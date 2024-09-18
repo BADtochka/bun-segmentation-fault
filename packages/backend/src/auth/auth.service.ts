@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import { isProd } from '@constants/env'
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import getSoftUser from '@utils/getSoftUser'
+import getPublicUser from '@utils/getPublicUser'
 import { compare, hash } from 'bcrypt'
-import { User } from 'src/users/user.entity'
+import { User } from 'src/users/entities/user.entity'
 import { UsersService } from 'src/users/users.service'
 import { jwtConstants } from './constants'
 import { DecodedJwtToken } from './types/jwt.type'
@@ -15,12 +16,12 @@ export class AuthService {
   ) {}
 
   async createAccessToken(user: Omit<User, 'password'>) {
-    const payload = { name: user.name, sub: user.id }
+    const payload = { name: user.username, sub: user.id }
     return this.jwtService.sign(payload)
   }
 
   async createRefreshToken(user: Omit<User, 'password'>) {
-    const payload = { name: user.name, sub: user.id }
+    const payload = { name: user.username, sub: user.id }
     return this.jwtService.sign(payload, {
       expiresIn: '7d',
       secret: jwtConstants.refreshToken,
@@ -28,15 +29,18 @@ export class AuthService {
   }
 
   async validateUser(username: string, rawPassword: string) {
-    const user = await this.userService.findOne({ name: username })
-    const isMatch = await compare(rawPassword, user.password)
+    const user = await this.userService.findOne({ username: username })
 
-    if (!user.isActive) {
+    if (!user) {
+      throw new UnauthorizedException('Неверное имя пользователя или пароль')
+    } else if (!user.isActive) {
       throw new UnauthorizedException('Ваша учётная запись отключена')
     }
 
+    const isMatch = await compare(rawPassword, user.password)
+
     if (user && isMatch) {
-      return getSoftUser(user)
+      return getPublicUser(user)
     }
 
     return null
@@ -71,11 +75,18 @@ export class AuthService {
       throw new UnauthorizedException()
     }
     const user = await this.userService.findOne({ id: decodedRefreshToken.sub })
-    const softUser = getSoftUser(user)
+    const softUser = getPublicUser(user)
     const accessToken = await this.createAccessToken(user)
     const refreshToken = await this.createRefreshToken(user)
     await this.updateRefreshToken(user.id, refreshToken)
     return { ...softUser, accessToken, refreshToken }
+  }
+
+  async register(user: Pick<User, 'username' | 'password'>) {
+    if (isProd) throw new NotFoundException()
+    const hashedPassword = await hash(user.password, 10)
+    const newUser = await this.userService.create(user.username, hashedPassword)
+    return getPublicUser(newUser)
   }
 
   async login(user: Omit<User, 'password'>) {

@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { UUID } from '@type/uuid.type'
+import { UUID } from '@type/UUID.type'
 import { Repository } from 'typeorm'
-import { User } from './user.entity'
+import { User } from './entities/user.entity'
 
 @Injectable()
 export class UsersService {
@@ -11,9 +11,15 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(username: UUID, hashedPassword: string) {
+  async create(username: string, hashedPassword: string) {
+    const alreadyExist = await this.usersRepository.findOne({
+      where: { username: username },
+    })
+
+    if (alreadyExist) throw new ConflictException('User already exists')
+
     const user = this.usersRepository.create({
-      name: username,
+      username: username,
       password: hashedPassword,
     })
     return await this.usersRepository.save(user)
@@ -31,7 +37,7 @@ export class UsersService {
     }
 
     const user = await this.usersRepository.findOne({
-      where: { name: queryUser.name },
+      where: { username: queryUser.username },
     })
     return user
   }
@@ -42,7 +48,7 @@ export class UsersService {
   }
 
   async remove(id: UUID) {
-    const user = await this.usersRepository.delete({ id })
+    const user = await this.usersRepository.delete({ id: id })
     return user
   }
 }

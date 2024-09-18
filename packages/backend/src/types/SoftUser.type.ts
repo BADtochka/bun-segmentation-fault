@@ -1,3 +1,3 @@
-import { User } from 'src/users/user.entity'
+import { User } from 'src/users/entities/user.entity'
 
-export type SoftUser = Pick<User, 'id' | 'name'>
+export type PublicUser = Pick<User, 'id' | 'username'>

@@ -2,17 +2,21 @@ import { isProd } from '@constants/env'
 import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { Request, Response } from 'express'
-import { User } from 'src/users/user.entity'
+import { User } from 'src/users/entities/user.entity'
 import { AuthService } from './auth.service'
-import { LocalAuthGuard } from './guards/local.guard'
-;('@constants/env')
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('register')
+  async register(@Req() req: Request, @Res() res: Response) {
+    const user = await this.authService.register(req.body as User)
+    return res.send(user)
+  }
+
   @Post('login')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(AuthGuard('local'))
   async login(@Req() req: Request, @Res() res: Response) {
     const user = await this.authService.login(req.user as User)
 

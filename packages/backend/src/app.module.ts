@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AuthModule } from './auth/auth.module';
-import { User } from './users/user.entity';
-import { UsersModule } from './users/users.module';
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { AppController } from './app.controller'
+import { AuthModule } from './auth/auth.module'
+import { User } from './users/entities/user.entity'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { UsersModule } from './users/users.module';
       port: 5433,
       username: 'dev',
       password: 'dev',
-      database: 'dev',
+      database: 'postgres',
       entities: [User],
       synchronize: true,
     }),
