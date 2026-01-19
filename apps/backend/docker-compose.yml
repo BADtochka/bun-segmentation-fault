@@ -1,0 +1,19 @@
+services:
+  backend:
+    restart: unless-stopped
+    image: backend
+    env_file: '.env'
+    build:
+      context: .
+    environment:
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
+
+  db:
+    env_file: '.env'
+    image: postgres
+    environment:
+      - POSTGRES_INITDB_ARGS=--locale=en_US.UTF-8
+    ports:
+      - '5432:5432'

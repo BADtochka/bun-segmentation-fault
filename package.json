@@ -1,0 +1,12 @@
+{
+  "name": "monorepo",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "cd apps/backend && bun start:dev"
+  },
+  "workspaces": [
+    "apps/**"
+  ]
+}

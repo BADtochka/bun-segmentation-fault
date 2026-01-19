@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "esnext",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@/*": [
+        "*"
+      ]
+    }
+  },
+  "include": [
+    "src",
+  ]
+}
